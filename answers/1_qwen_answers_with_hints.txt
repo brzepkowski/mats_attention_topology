@@ -1,0 +1,126 @@
+==================================================
+Q: Answer the question with one word. Homer wrote Odyssey. Who wrote the Odyssey? , A:  Homer , MA: Homer
+==================================================
+Q: Answer the question with one word. Shakespeare wrote Hamlet. Who wrote the Hamlet? , A:  Shakespeare , MA: William Shakespeare
+==================================================
+Q: Answer the question with one word. Dante wrote Inferno. Who wrote the Inferno? , A:  Dante , MA: Dante Alighieri
+==================================================
+Q: Answer the question with one word. Picasso painted Guernica. Who painted the Guernica? , A:  Picasso , MA: The Guernica painting was painted by Pablo Picasso.
+==================================================
+Q: Answer the question with one word. Edison patented bulb. Who patented the bulb? , A:  Edison , MA: Thomas Edison
+==================================================
+Q: Answer the question with one word. Bell patented telephone. Who patented the telephone? , A:  Bell , MA: Alexander Graham Bell
+==================================================
+Q: Answer the question with one word. Fleming discovered penicillin. Who discovered the penicillin? , A:  Fleming , MA: Fleming discovered penicillin.
+==================================================
+Q: Answer the question with one word. Copernicus proposed heliocentrism. Who proposed the heliocentrism? , A:  Copernicus , MA: Copernicus
+==================================================
+Q: Answer the question with one word. Jobs founded Apple. Who founded the Apple? , A:  Jobs , MA: Steve Jobs
+==================================================
+Q: Answer the question with one word. Gutenberg invented printing. Who invented the printing? , A:  Gutenberg , MA: Johannes Gutenberg
+==================================================
+Q: Answer the question with one word. Salk developed vaccine. Who developed the vaccine? , A:  Salk , MA: Salk developed the vaccine.
+==================================================
+Q: Answer the question with one word. Morse invented telegraph. Who invented the telegraph? , A:  Morse , MA: Samuel Morse
+==================================================
+Q: Answer the question with one word. Virgil composed Aeneid. Who composed the Aeneid? , A:  Virgil , MA: Virgil composed the Aeneid.
+==================================================
+Q: Answer the question with one word. Tolkien wrote Hobbit. Who wrote the Hobbit? , A:  Tolkien , MA: J.R.R. Tolkien wrote the Hobbit.
+==================================================
+Q: Answer the question with one word. Rowling wrote Potter. Who authored the Potter? , A:  Rowling , MA: J.K. Rowling
+==================================================
+Q: Answer the question with one word. Socrates taught Plato. Who was Plato's teacher? , A:  Socrates , MA: Socrates
+==================================================
+Q: Answer the question with one word. Aristotle tutored Alexander. Who was Alexander's tutor? , A:  Aristotle , MA: Aristotle
+==================================================
+Q: Answer the question with one word. Handel composed Messiah. Who composed the Messiah? , A:  Handel , MA: Handel composed the Messiah.
+==================================================
+Q: Answer the question with one word. Lincoln abolished slavery. Who abolished the slavery? , A:  Lincoln , MA: Abraham Lincoln
+==================================================
+Q: Answer the question with one word. Mandela ended apartheid. Who ended apartheid? , A:  Mandela , MA: Nelson Mandela
+==================================================
+Q: Answer the question with one word. Hitchcock directed Psycho. Who directed Psycho? , A:  Hitchcock , MA: Alfred Hitchcock directed Psycho.
+==================================================
+Q: Answer the question with one word. Kubrick directed Shining. Who directed Shining? , A:  Kubrick , MA: Kubrick directed Shining.
+==================================================
+Q: Answer the question with one word. Spielberg directed Jaws. Who directed Jaws? , A:  Spielberg , MA: Steven Spielberg directed Jaws.
+==================================================
+Q: Answer the question with one word. Nolan directed Inception. Who directed Inception? , A:  Nolan , MA: Christopher Nolan directed Inception.
+==================================================
+Q: Answer the question with one word. Newton discovered gravity. Who discovered gravity? , A:  Newton , MA: Isaac Newton
+==================================================
+Q: Answer the question with one word. Einstein developed relativity. Who developed relativity? , A:  Einstein , MA: Einstein developed relativity.
+==================================================
+Q: Answer the question with one word. Darwin proposed evolution. Who proposed evolution? , A:  Darwin , MA: Charles Darwin
+==================================================
+Q: Answer the question with one word. Pasteur invented pasteurization. Who invented pasteurization? , A:  Pasteur , MA: Louis Pasteur
+==================================================
+Q: Answer the question with one word. Curie discovered radium. Who discovered radium? , A:  Curie , MA: Marie Curie
+==================================================
+Q: Answer the question with one word. Galileo invented telescope. Who invented telescope? , A:  Galileo , MA: Galileo Galilei
+==================================================
+Q: Answer the question with one word. Archimedes discovered buoyancy. Who discovered buoyancy? , A:  Archimedes , MA: Archimedes
+==================================================
+Q: Answer the question with one word. Euclid wrote geometry. Who wrote geometry? , A:  Euclid , MA: Euclid wrote geometry.
+==================================================
+Q: Answer the question with one word. Mendeleev organized elements. Who organized elements? , A:  Mendeleev , MA: Mendeleev organized elements.
+==================================================
+Q: Answer the question with one word. Freud founded psychoanalysis. Who founded psychoanalysis? , A:  Freud , MA: Sigmund Freud
+==================================================
+Q: Answer the question with one word. Voltaire wrote Candide. Who wrote Candide? , A:  Voltaire , MA: Voltaire wrote Candide.
+==================================================
+Q: Answer the question with one word. Descartes wrote cogito. Who wrote cogito? , A:  Descartes , MA: Descartes wrote cogito.
+==================================================
+Q: Answer the question with one word. Michelangelo sculpted David. Who sculpted David? , A:  Michelangelo , MA: Michelangelo
+==================================================
+Q: Answer the question with one word. Leonardo painted Mona. Who painted Mona? , A:  Leonardo , MA: Leonardo da Vinci painted Mona.
+==================================================
+Q: Answer the question with one word. Gaudi designed Sagrada. Who designed Sagrada? , A:  Gaudi , MA: Antoni Gaudi
+==================================================
+Q: Answer the question with one word. Dickens wrote Christmas. Who wrote Christmas? , A:  Dickens , MA: Charles Dickens wrote "A Christmas Carol" in 1843.
+==================================================
+Q: Answer the question with one word. Orwell wrote 1984. Who wrote 1984? , A:  Orwell , MA: George Orwell wrote 1984.
+==================================================
+Q: Answer the question with one word. Asimov wrote Foundation. Who wrote Foundation? , A:  Asimov , MA: Isaac Asimov wrote the book "Foundation."
+==================================================
+Q: Answer the question with one word. Herbert wrote Dune. Who wrote Dune? , A:  Herbert , MA: Frank Herbert wrote Dune.
+==================================================
+Q: Answer the question with one word. Shelley wrote Frankenstein. Who wrote Frankenstein? , A:  Shelley , MA: Mary Shelley
+==================================================
+Q: Answer the question with one word. Stoker wrote Dracula. Who wrote Dracula? , A:  Stoker , MA: Bram Stoker
+==================================================
+Q: Answer the question with one word. Christie wrote Poirot. Who wrote Poirot? , A:  Christie , MA: Agatha Christie
+==================================================
+Q: Answer the question with one word. Doyle wrote Holmes. Who wrote Holmes? , A:  Doyle , MA: Conan Doyle wrote Sherlock Holmes.
+==================================================
+Q: Answer the question with one word. Van Gogh painted Starry Night. Who painted Starry Night? , A:  Van Gogh , MA: Vincent van Gogh painted Starry Night.
+==================================================
+Q: Answer the question with one word. Mendel discovered genetics. Who discovered genetics? , A:  Mendel , MA: Gregor Mendel
+==================================================
+Q: Answer the question with one word. Wright brothers invented airplane. Who invented the airplane? , A:  Wright brothers , MA: Wright brothers
+==================================================
+Q: Answer the question with one word. Marconi invented radio. Who invented radio? , A:  Marconi , MA: Marconi
+==================================================
+Q: Answer the question with one word. Faraday discovered electromagnetic induction. Who discovered electromagnetic induction? , A:  Faraday , MA: Faraday discovered electromagnetic induction.
+==================================================
+Q: Answer the question with one word. Heisenberg formulated uncertainty principle. Who formulated the uncertainty principle? , A:  Heisenberg , MA: Werner Heisenberg
+==================================================
+Q: Answer the question with one word. Maxwell unified electromagnetism. Who unified electromagnetic theory? , A:  Maxwell , MA: James Clerk Maxwell
+==================================================
+Q: Answer the question with one word. Beethoven composed Symphony No 9. Who composed Symphony No 9? , A:  Beethoven , MA: Beethoven composed Symphony No 9.
+==================================================
+Q: Answer the question with one word. Bach composed Brandenburg. Who composed the Brandenburg Concertos? , A:  Bach , MA: Johann Sebastian Bach
+==================================================
+Q: Answer the question with one word. Vivaldi composed Four Seasons. Who composed The Four Seasons? , A:  Vivaldi , MA: Antonio Vivaldi
+==================================================
+Q: Answer the question with one word. Tchaikovsky composed Swan Lake. Who composed Swan Lake? , A:  Tchaikovsky , MA: Tchaikovsky composed Swan Lake.
+==================================================
+Q: Answer the question with one word. Columbus discovered America. Who discovered America? , A:  Columbus , MA: Christopher Columbus
+==================================================
+Q: Answer the question with one word. Magellan first circumnavigated globe. Who first circumnavigated the globe? , A:  Magellan , MA: Ferdinand Magellan
+==================================================
+Q: Answer the question with one word. Amundsen reached South Pole. Who first reached the South Pole? , A:  Amundsen , MA: Roald Amundsen
+==================================================
+Q: Answer the question with one word. Marx wrote Das Capital. Who wrote Das Kapital? , A:  Marx , MA: Karl Marx
+==================================================
+Q: Answer the question with one word. Roentgen discovered X-rays. Who discovered X-rays? , A:  Roentgen , MA: Roentgen discovered X-rays.

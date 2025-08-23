@@ -1,11 +1,14 @@
-from transformers import AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import numpy as np
 import json
+import torch
 
 
+# ========== PROMPTS PROCESSING ==========
 def get_number_of_tokens(prompt_text, tokenizer):
     inputs = tokenizer(prompt_text, return_tensors="pt", truncation=True)
     return inputs["input_ids"].shape[1]
+
 
 def prompt_len_with_most_occurences(model_name, prompts_path):
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
@@ -53,19 +56,5 @@ def keep_prompts_of_len(target_length, model_name, prompts_path, output_path):
 
     # print("kept_prompts: \n", kept_prompts)
 
-    with open(output_path, 'w') as f:
-        json.dump(kept_prompts, f)
-
-
-
-if __name__ == "__main__":
-    prompts_path = "prompts/initial_prompts.json"
-    output_path = "prompts/qwen_0_5B_prompts.json"
-    model_name = "Qwen/Qwen2.5-0.5B"
-
-    target_length = prompt_len_with_most_occurences(model_name, prompts_path)
-    keep_prompts_of_len(target_length, model_name, prompts_path, output_path)
-
-    # prompt_len_with_most_occurences("Qwen/Qwen2.5-1.5B", prompts_path)
-    # prompt_len_with_most_occurences("deepseek-ai/deepseek-coder-1.3b-base", prompts_path)
-    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(kept_prompts, f, ensure_ascii=False, indent=4)
