@@ -24,23 +24,30 @@ correct_prompt = correct_prompts[0]['prompt']
 attention, _ = extract_attention_from_text(tokenizer, model, correct_prompt)
 
 # Extract the `attention` matrix for the 0th head in each layer
-head_idx = 0
 points = None  # We want to use points from the previous layer as a starting point, while generating the embedding for the next layer
 fig = plt.figure(figsize=(16, 8))
 
 epsilon = 0.7  # For now fix the epsilon to 0.7
 
 for layer_idx in range(num_layers):
-    A = attention[layer_idx, head_idx].numpy()
 
-    dist = 1.0 - (A + A.T) / 2.0
+    # 3. Get dist matrix as an average over all heads in a given layer
+    num_heads = attention[layer_idx].shape[0]
+    dist = None
+    for head_idx in range(num_heads):
+        A = attention[layer_idx, head_idx].numpy()
+        if dist is None:
+            dist = 1.0 - (A + A.T) / 2.0
+        else:
+            dist += 1.0 - (A + A.T) / 2.0
+    dist /= num_heads
 
-    # 3. Embed tokens in 2D space
+    # 4. Embed tokens in 2D space
     # Note: Because dist cannot be interpreted as a proper metric (rather as dissimilarity),
     # this embedding will come with some error! (The last attribute below is thus crucial!)
     points, stress = smacof(dist, n_components=2, init=points, n_init=1, random_state=RANDOM_SEED, metric=False)
 
-    # 4. Plot the simplical complexes for different values of epsilon
+    # 5. Plot the simplical complexes for different values of epsilon
     max_dim = 2
     ax = fig.add_subplot(4, int(num_layers / 4), layer_idx + 1)  # add_subplot(nrows, ncols, index, **kwargs)
 
