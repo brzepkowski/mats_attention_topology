@@ -23,14 +23,15 @@ num_layers = model.config.num_hidden_layers  # Get the number of attention layer
 correct_prompt = correct_prompts[0]['prompt']
 attention, _ = extract_attention_from_text(tokenizer, model, correct_prompt)
 
-points = None  # We want to use points from the previous layer as a starting point, while generating the embedding for the next layer
-fig = plt.figure(figsize=(16, 8))
+fig_points = plt.figure(figsize=(16, 8))
+fig_barcodes = plt.figure(figsize=(16, 8))
 
 max_dim = 2
-max_epsilon = 0.7  # For now fix the epsilon to 0.7
+max_epsilon = 1.0  # We can now set max_epsilon to 1.0, as we are now operating in the "proper"
+                   # space, where the max distance is equal to 1
+points=None
 
 for layer_idx in range(num_layers):
-
     # 3. Get dist matrix as an average over all heads in a given layer
     num_heads = attention[layer_idx].shape[0]
     dist = None
@@ -42,20 +43,16 @@ for layer_idx in range(num_layers):
             dist += 1.0 - (A + A.T) / 2.0
     dist /= num_heads
 
-    # 4. Embed tokens in 2D space
-    # Note: Because dist cannot be interpreted as a proper metric (rather as dissimilarity),
-    # this embedding will come with some error! (The last attribute below is thus crucial!)
+    # 4. Embed in 2D space, but use simplex tree from the abstract one, just to have a vague idea of what's happening
     points, stress = smacof(dist, n_components=2, init=points, n_init=1, random_state=RANDOM_SEED, metric=False)
-    # print(layer_idx, " | stress: ", stress)
 
-    # 5. Plot the simplical complexes for different values of epsilon
-    ax = fig.add_subplot(4, int(num_layers / 4), layer_idx + 1)  # add_subplot(nrows, ncols, index, **kwargs)
-
-    # Create Vietoris–Rips complex - a simplex is included iff all its vertices are pairwise within distance epsilon
-    rips_complex = gd.RipsComplex(points=points, max_edge_length=max_epsilon)
+    rips_complex = gd.RipsComplex(distance_matrix=dist, max_edge_length=max_epsilon)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=max_dim)
-        
-    draw_simplicial_complex(ax, points, simplex_tree, layer_idx)
+    simplex_tree.persistence()
 
-plt.tight_layout()
+    ax_points = fig_points.add_subplot(4, int(num_layers / 4), layer_idx + 1)  # add_subplot(nrows, ncols, index, **kwargs)
+    ax_barcodes = fig_barcodes.add_subplot(4, int(num_layers / 4), layer_idx + 1)  # add_subplot(nrows, ncols, index, **kwargs)
+
+    draw_simplicial_complex(ax_points, points, simplex_tree, layer_idx)
+    gd.plot_persistence_barcode(simplex_tree.persistence_intervals_in_dimension(1), axes=ax_barcodes, fontsize=10)
 plt.show()

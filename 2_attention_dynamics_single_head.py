@@ -28,7 +28,8 @@ head_idx = 0
 points = None  # We want to use points from the previous layer as a starting point, while generating the embedding for the next layer
 fig = plt.figure(figsize=(16, 8))
 
-epsilon = 0.7  # For now fix the epsilon to 0.7
+max_dim = 2
+max_epsilon = 0.7  # For now fix the epsilon to 0.7
 
 for layer_idx in range(num_layers):
     A = attention[layer_idx, head_idx].numpy()
@@ -39,13 +40,13 @@ for layer_idx in range(num_layers):
     # Note: Because dist cannot be interpreted as a proper metric (rather as dissimilarity),
     # this embedding will come with some error! (The last attribute below is thus crucial!)
     points, stress = smacof(dist, n_components=2, init=points, n_init=1, random_state=RANDOM_SEED, metric=False)
+    # print(layer_idx, " | stress: ", stress)
 
     # 4. Plot the simplical complexes for different values of epsilon
-    max_dim = 2
     ax = fig.add_subplot(4, int(num_layers / 4), layer_idx + 1)  # add_subplot(nrows, ncols, index, **kwargs)
 
     # Create Vietoris–Rips complex - a simplex is included iff all its vertices are pairwise within distance epsilon
-    rips_complex = gd.RipsComplex(points=points, max_edge_length=epsilon)
+    rips_complex = gd.RipsComplex(points=points, max_edge_length=max_epsilon)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=max_dim)
         
     draw_simplicial_complex(ax, points, simplex_tree, layer_idx)
