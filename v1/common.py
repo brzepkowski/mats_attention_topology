@@ -21,6 +21,18 @@ def extract_attention_from_text(tokenizer, model, text):
 
     if outputs.attentions is None:
         raise ValueError("No attention returned by model.")
+
+    return torch.stack([a for a in outputs.attentions if a is not None]).squeeze(1).detach().cpu()
+
+
+def extract_attention_and_next_token_from_text(tokenizer, model, text):
+    inputs = tokenizer(text, return_tensors="pt", max_length=1000, truncation=True)
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    if outputs.attentions is None:
+        raise ValueError("No attention returned by model.")
     
     logits = outputs.logits  # [batch, seq_len, vocab_size]
     next_token_logits = logits[:, -1, :]  # last position. It returns a MATRIX [batch_size x vocab_size]

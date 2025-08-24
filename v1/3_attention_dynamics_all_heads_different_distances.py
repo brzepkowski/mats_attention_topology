@@ -21,7 +21,7 @@ with open(CORRECT_PROMPTS_PATH) as f:
 tokenizer, model = load_model_and_tokenizer(MODEL_NAME)
 num_layers = model.config.num_hidden_layers  # Get the number of attention layers
 
-attention, _ = extract_attention_from_text(tokenizer, model, "This is just some test prompt!")
+attention = extract_attention_from_text(tokenizer, model, "This is just some test prompt!")
 
 fig_dist_0 = plt.figure(figsize=(16, 8))
 fig_dist_1 = plt.figure(figsize=(16, 8))

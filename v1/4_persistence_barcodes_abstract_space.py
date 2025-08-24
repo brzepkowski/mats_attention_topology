@@ -24,7 +24,7 @@ correct_prompt = correct_prompts[20]
 
 print("correct_prompt: ", correct_prompt)
 
-attention, _ = extract_attention_from_text(tokenizer, model, correct_prompt)
+attention = extract_attention_from_text(tokenizer, model, correct_prompt)
 
 # fig_points = plt.figure(figsize=(16, 8))
 fig_barcodes = plt.figure(figsize=(16, 8))
