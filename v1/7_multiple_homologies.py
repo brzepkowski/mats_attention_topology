@@ -48,8 +48,13 @@ def barcodes_for_prompt(tokenizer, model, device, prompt, max_dim = 2):
         for i in range(max_dim):
             _persistence_intervals = simplex_tree.persistence_intervals_in_dimension(i)
 
-            # For now just remove barcodes with infinite length. TODO: Fix this later!
-            _persistence_intervals = np.array([bar for bar in _persistence_intervals if bar[1] != np.inf])
+            # # ----- OLD VERSION REMOVING BARCODES WITH INFINITE LENGTH -----
+            # _persistence_intervals = np.array([bar for bar in _persistence_intervals if bar[1] != np.inf])
+
+            # ----- BECAUSE MAX DISTANCE IN OUR CASE IS EQUAL TO 1, REPLACE INFINITE ENDS OF BARCODES WITH 1 -----
+            for j, bar in enumerate(_persistence_intervals):
+                if bar[1] == np.inf:
+                    _persistence_intervals[j] = [bar[0], 1.0]
 
             persistence_intervals_single_layer.append(_persistence_intervals)
 
@@ -62,7 +67,7 @@ def custom_entropy(arr):
     for single_prompt_persistence_intervals in arr:
         k = len(single_prompt_persistence_intervals)
         p = [bar[1] - bar[0] for bar in single_prompt_persistence_intervals]
-        p = p/np.sum(p)
+        p = p / np.sum(p)
         entropy = -np.dot(p, np.log(p))
 
         # Normalize entropy
@@ -91,7 +96,7 @@ def persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, ax
         pe_array = custom_entropy(_persistence_intervals)
         pe_per_layer.append(pe_array)
 
-    bp = ax.boxplot(pe_per_layer, labels=range(model.config.num_hidden_layers), patch_artist=True)
+    bp = ax.boxplot(pe_per_layer, tick_labels=range(model.config.num_hidden_layers), patch_artist=True)
     return bp
 
 

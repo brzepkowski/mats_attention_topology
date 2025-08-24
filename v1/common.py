@@ -22,7 +22,7 @@ def load_model_and_tokenizer(model_name):
         output_attentions=True,
         trust_remote_code=True,
         attn_implementation="eager",
-        torch_dtype=torch.float16,  # Use half precision to save memory
+        # torch_dtype=torch.float16,  # Use half precision to save memory
     )
 
     # Move model to GPU
