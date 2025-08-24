@@ -34,7 +34,7 @@ def load_model_and_tokenizer(model_name):
 
 
 def extract_attention_from_text(tokenizer, model, device, text):
-    inputs = tokenizer(text, return_tensors="pt", max_length=1000, truncation=True)
+    inputs = tokenizer(text, return_tensors="pt")
 
     # Move input tensors to the same device as the model
     inputs = {k: v.to(device) for k, v in inputs.items()}
@@ -48,24 +48,7 @@ def extract_attention_from_text(tokenizer, model, device, text):
     return torch.stack([a for a in outputs.attentions if a is not None]).squeeze(1).detach().cpu()
 
 
-def extract_attention_and_next_token_from_text(tokenizer, model, text):
-    inputs = tokenizer(text, return_tensors="pt", max_length=1000, truncation=True)
-
-    with torch.no_grad():
-        outputs = model(**inputs)
-
-    if outputs.attentions is None:
-        raise ValueError("No attention returned by model.")
-    
-    logits = outputs.logits  # [batch, seq_len, vocab_size]
-    next_token_logits = logits[:, -1, :]  # last position. It returns a MATRIX [batch_size x vocab_size]
-    predicted_id = torch.argmax(next_token_logits, dim=-1)
-    predicted_token = tokenizer.decode(predicted_id)
-
-    return torch.stack([a for a in outputs.attentions if a is not None]).squeeze(1).detach().cpu(), predicted_token
-
-
-def answer_prompt(prompt, tokenizer, model, max_new_tokens=50):
+def answer_prompt(tokenizer, model, device, prompt, max_new_tokens=10):
     """
     Advanced version with more control over generation parameters.
     
@@ -88,6 +71,9 @@ def answer_prompt(prompt, tokenizer, model, max_new_tokens=50):
         
         # Tokenize input
         inputs = tokenizer.encode(prompt, return_tensors="pt")
+
+        # Move inputs to the specified device
+        inputs = inputs.to(device)
         
         # Generate response
         with torch.no_grad():
@@ -95,7 +81,7 @@ def answer_prompt(prompt, tokenizer, model, max_new_tokens=50):
                 inputs,
                 max_new_tokens=max_new_tokens,
                 # temperature=0.1,
-                # do_sample=True,
+                do_sample=False,
                 pad_token_id=tokenizer.eos_token_id,
                 attention_mask=torch.ones_like(inputs)
             )
