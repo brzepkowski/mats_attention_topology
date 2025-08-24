@@ -11,7 +11,7 @@ CORRECT_PROMPTS_PATH = "prompts/correct_prompts.json"
 # MISLEADING_PROMPTS_PATH = "prompts/1_misleading_prompts.json"
 
 RANDOM_SEED = 42
-MODEL_NAME = "Qwen/Qwen2.5-1.5B"
+MODEL_NAME = "Qwen/Qwen2.5-3B"
 
 # 1. Load prompts with both correct and misleading hints
 with open(CORRECT_PROMPTS_PATH) as f:
