@@ -44,45 +44,39 @@ def barcodes_for_prompt(tokenizer, model, prompt, max_dim = 2):
         persistence_intervals_single_layer = []
         for i in range(max_dim):
             _persistence_intervals = simplex_tree.persistence_intervals_in_dimension(i)
-            # print("_persistence_intervals: \n", _persistence_intervals)
 
             # For now just remove barcodes with infinite length. TODO: Fix this later!
             _persistence_intervals = np.array([bar for bar in _persistence_intervals if bar[1] != np.inf])
-            
-            # print("_persistence_intervals: \n", _persistence_intervals)
-            # import sys
-            # sys.exit()
+
             persistence_intervals_single_layer.append(_persistence_intervals)
 
         persistence_intervals_multiple_layers.append(persistence_intervals_single_layer)
     return persistence_intervals_multiple_layers
 
 
-def persistence_entropy(tokenizer, model, prompts, ax):
-    persistence_intervals_multiple_prompts = []
-    for prompt in tqdm(prompts):
-        persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, prompt, max_dim = 2))
-    # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
+def custom_entropy(arr):
+    entropies = []
+    for single_prompt_persistence_intervals in arr:
+        k = len(single_prompt_persistence_intervals)
+        p = [bar[1] - bar[0] for bar in single_prompt_persistence_intervals]
+        p = p/np.sum(p)
+        entropy = -np.dot(p, np.log(p))
 
-    # print("0) len(persistence_intervals_multiple_prompts): ", len(persistence_intervals_multiple_prompts))
-    # print("1) len(persistence_intervals_multiple_prompts[0]): ", len(persistence_intervals_multiple_prompts[0]))
-    # print("2) len(persistence_intervals_multiple_prompts[0][0]): ", len(persistence_intervals_multiple_prompts[0][0]))
-    # print("3) len(persistence_intervals_multiple_prompts[0][0][0]): ", len(persistence_intervals_multiple_prompts[0][0][0]))
-    # print("=" * 100)
+        # Normalize entropy
+        entropy /= np.log(k)
+        entropies.append(entropy)
+    return np.array(entropies)
 
-    # H_0 homology
-    # ~h_0_persistence_intervals = persistence_intervals_multiple_prompts[:, :, 0, :]
+
+def persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, ax):
+    # H_{h_dim} homology
+    # ~h_0_persistence_intervals = persistence_intervals_multiple_prompts[:, :, homology_dim, :]
     h_0_persistence_intervals = []
     for i in range(len(persistence_intervals_multiple_prompts)):
         h_0_persistence_intervals.append([])
         for j in range(len(persistence_intervals_multiple_prompts[i])):
-            h_0_persistence_intervals[i].append(persistence_intervals_multiple_prompts[i][j][0])
+            h_0_persistence_intervals[i].append(persistence_intervals_multiple_prompts[i][j][homology_dim])
     # `h_0_persistence_intervals` has shape PROMPTS_NUM X LAYERS_NUM X BARCODES_NUM
-
-    # print("0) len(h_0_persistence_intervals): ", len(h_0_persistence_intervals))
-    # print("1) len(h_0_persistence_intervals[0]): ", len(h_0_persistence_intervals[0]))
-    # print("2) len(h_0_persistence_intervals[0][0]): ", len(h_0_persistence_intervals[0][0]))
-    # print("=" * 100)
 
     pe_per_layer = []
     for layer_idx in tqdm(range(model.config.num_hidden_layers)):
@@ -91,53 +85,47 @@ def persistence_entropy(tokenizer, model, prompts, ax):
         for i in range(len(h_0_persistence_intervals)):
             _persistence_intervals.append(h_0_persistence_intervals[i][layer_idx])
 
-        # print("0) len(_persistence_intervals): ", len(_persistence_intervals))
-        # print("1) len(_persistence_intervals[0]): ", len(_persistence_intervals[0]))
-        # print("-" * 100)
-
-        # print("0) len(_persistence_intervals): ", len(_persistence_intervals))
-        # print("1) len(_persistence_intervals[0]): ", len(_persistence_intervals[0]))
-
-        
-        # Replace Gudhi's entropy with my normalized version
-        # PE = gd.representations.Entropy()
-        # pe = PE.fit_transform(_persistence_intervals)
-        # pe_array = np.array(pe[:,0])
-
         pe_array = custom_entropy(_persistence_intervals)
-
-        # print("pe_array: ", pe_array)
-
         pe_per_layer.append(pe_array)
 
     bp = ax.boxplot(pe_per_layer, labels=range(model.config.num_hidden_layers), patch_artist=True)
     return bp
 
 
-def custom_entropy(arr):
-    entropies = []
-    for single_prompt_persistence_intervals in arr:
-        # print("single_prompt_persistence_intervals: \n", single_prompt_persistence_intervals)
+def persistence_entropy_multiple_homologies(tokenizer, model, correct_prompts, conflicting_prompts, max_homology_dim, axs):
+    bps_correct = []
+    bps_conflicting = []
 
-        k = len(single_prompt_persistence_intervals)
-        # print("k: ", k)
+    # 1. Correct prompts
+    persistence_intervals_multiple_prompts = []
+    for prompt in tqdm(correct_prompts):
+        persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, prompt, max_dim = max_homology_dim + 1))
+    # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
 
-        p = [bar[1] - bar[0] for bar in single_prompt_persistence_intervals]
+    for homology_dim in range(max_homology_dim + 1):
+        bp_correct = persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, axs[homology_dim])
+        bps_correct.append(bp_correct)
+        # Color the boxes differently
+        for patch in bp_correct['boxes']:
+            patch.set_facecolor('lightblue')
 
-        p = p/np.sum(p)
+    # 2. Conflicting prompts
+    persistence_intervals_multiple_prompts = []
+    for prompt in tqdm(conflicting_prompts):
+        persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, prompt, max_dim = max_homology_dim + 1))
+    # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
 
-        # print("probabilities: \n", p)
+    for homology_dim in range(max_homology_dim + 1):
+        bp_conflicting = persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, axs[homology_dim])
+        bps_conflicting.append(bp_conflicting)
+        # Color the boxes differently
+        for patch in bp_conflicting['boxes']:
+            patch.set_facecolor('lightcoral')
+            patch.set_alpha(0.6)  # Make semi-transparent
 
-        entropy = -np.dot(p, np.log(p))
-
-        # print("entropy: ", entropy)
-
-        # Normalize entropy
-        entropy /= np.log(k)
-
-        entropies.append(entropy)
-
-    return np.array(entropies)    
+    # 3. Add legends to figures
+    for i in range(len(axs)):
+        axs[i].legend([bps_correct[i]["boxes"][0], bps_conflicting[i]["boxes"][0]], ['Correct prompts', 'Conflicting prompts'])
 
 
 if __name__ == "__main__":
@@ -159,18 +147,29 @@ if __name__ == "__main__":
     tokenizer, model = load_model_and_tokenizer(MODEL_NAME)
 
     # ----- THE MAIN PART -----
-    fig, ax = plt.subplots()
-    bp_0 = persistence_entropy(tokenizer, model, correct_prompts, ax)
-    bp_1 = persistence_entropy(tokenizer, model, conflicting_prompts, ax)
+    max_homology_dim = 1
 
-    # Color the boxes differently
-    for patch in bp_0['boxes']:
-        patch.set_facecolor('lightblue')
-    for patch in bp_1['boxes']:
-        patch.set_facecolor('lightcoral')
-        patch.set_alpha(0.6)  # Make semi-transparent
+    figs = []
+    axs = []
+    for homology_dim in range(max_homology_dim + 1):
+        fig, ax = plt.subplots()
+        figs.append(fig)
+        axs.append(ax)
 
-    # Add legend
-    ax.legend([bp_0["boxes"][0], bp_1["boxes"][0]], ['Correct prompts', 'Conflicting prompts'])
+    persistence_entropy_multiple_homologies(tokenizer, model, correct_prompts, conflicting_prompts, max_homology_dim, axs)
+
+
+    # bp_0 = persistence_entropy(tokenizer, model, correct_prompts, ax)
+    # bp_1 = persistence_entropy(tokenizer, model, conflicting_prompts, ax)
+
+    # # Color the boxes differently
+    # for patch in bp_0['boxes']:
+    #     patch.set_facecolor('lightblue')
+    # for patch in bp_1['boxes']:
+    #     patch.set_facecolor('lightcoral')
+    #     patch.set_alpha(0.6)  # Make semi-transparent
+
+    # # Add legend
+    # ax.legend([bp_0["boxes"][0], bp_1["boxes"][0]], ['Correct prompts', 'Conflicting prompts'])
 
     plt.show()
