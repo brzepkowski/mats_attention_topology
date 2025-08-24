@@ -49,26 +49,9 @@ def barcodes_for_prompt(tokenizer, model, prompt, max_dim = 2):
     return persistence_intervals_multiple_layers
 
 
-if __name__ == "__main__":
-    np.set_printoptions(linewidth=np.inf)
-    random.seed(RANDOM_SEED)
-
-    with open(CORRECT_PROMPTS_PATH) as f:
-        correct_prompts = json.load(f)
-
-    with open(CONFLICTING_PROMPTS_PATH) as f:
-        conflicting_prompts = json.load(f)
-
-    prompts_indices = sorted(random.choices(range(len(correct_prompts)), k=TEST_SIZE))
-    print("prompts_indices: ", prompts_indices)
-
-    correct_prompts = np.array(correct_prompts)[prompts_indices]
-    conflicting_prompts = np.array(conflicting_prompts)[prompts_indices]
-
-    tokenizer, model = load_model_and_tokenizer(MODEL_NAME)
-
+def persistence_entropy(tokenizer, model, prompts, ax):
     persistence_intervals_multiple_prompts = []
-    for prompt in tqdm(correct_prompts):
+    for prompt in tqdm(prompts):
         persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, prompt, max_dim = 2))
     # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
 
@@ -117,15 +100,40 @@ if __name__ == "__main__":
 
         pe_per_layer.append(pe_array)
 
+    bp = ax.boxplot(pe_per_layer, labels=range(model.config.num_hidden_layers), patch_artist=True)
+    return bp
 
+
+if __name__ == "__main__":
+    np.set_printoptions(linewidth=np.inf)
+    random.seed(RANDOM_SEED)
+
+    with open(CORRECT_PROMPTS_PATH) as f:
+        correct_prompts = json.load(f)
+
+    with open(CONFLICTING_PROMPTS_PATH) as f:
+        conflicting_prompts = json.load(f)
+
+    prompts_indices = sorted(random.choices(range(len(correct_prompts)), k=TEST_SIZE))
+    print("prompts_indices: ", prompts_indices)
+
+    correct_prompts = np.array(correct_prompts)[prompts_indices]
+    conflicting_prompts = np.array(conflicting_prompts)[prompts_indices]
+
+    tokenizer, model = load_model_and_tokenizer(MODEL_NAME)
+
+    # ----- THE MAIN PART -----
     fig, ax = plt.subplots()
+    bp_0 = persistence_entropy(tokenizer, model, correct_prompts, ax)
+    bp_1 = persistence_entropy(tokenizer, model, conflicting_prompts, ax)
 
-    #Fix the boxplot
-    bp = ax.boxplot(pe_per_layer, labels=range(model.config.num_hidden_layers))
+    # Color the boxes differently
+    for patch in bp_0['boxes']:
+        patch.set_facecolor('lightblue')
+    for patch in bp_1['boxes']:
+        patch.set_facecolor('lightcoral')
 
-    #We change the axis letter size to see them better
-    plt.rc('xtick', labelsize=20)
-    plt.rc('ytick', labelsize=15)
+    # Add legend
+    ax.legend([bp_0["boxes"][0], bp_1["boxes"][0]], ['Correct prompts', 'Conflicting prompts'])
 
     plt.show()
-
