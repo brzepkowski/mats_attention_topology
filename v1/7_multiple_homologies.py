@@ -18,6 +18,8 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
 def barcodes_for_prompt(tokenizer, model, device, prompt, max_dim = 2):
+    prompt = 'Is this context correct? Yes/No\n"' + prompt + '"'  # TODO: Decide whether to keep!
+
     num_layers = model.config.num_hidden_layers  # Get the number of attention layers
 
     attention = extract_attention_from_text(tokenizer, model, device, prompt)
@@ -166,8 +168,8 @@ if __name__ == "__main__":
     persistence_entropy_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs)
     for i, fig in enumerate(figs):
         subtitle = MODEL_NAME.split("/")[1]
-        fig.suptitle(rf"{subtitle} | $H_{{{i}}}$")
-        fig.savefig(f"{subtitle}_H{i}_n{TEST_SIZE}.png")
-        fig.savefig(f"{subtitle}_H{i}_n{TEST_SIZE}.pdf")
+        fig.suptitle(rf"{subtitle} | $PE_{{{i}}}$")
+        fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}.png")
+        fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}.pdf")
 
     # plt.show()
