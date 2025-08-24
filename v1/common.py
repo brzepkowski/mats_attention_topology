@@ -1,20 +1,43 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import matplotlib.pyplot as plt
 import torch
+import gc
 
 
 def load_model_and_tokenizer(model_name):
+    # Check if CUDA is available
+    """Clear GPU memory cache"""
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        gc.collect()
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    print(f"Using device: {device}")
+
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     # model = AutoModel.from_pretrained(model_name, output_attentions=True, trust_remote_code=True, attn_implementation="eager")
-    model = AutoModelForCausalLM.from_pretrained(model_name, output_attentions=True, trust_remote_code=True, attn_implementation="eager")
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        output_attentions=True,
+        trust_remote_code=True,
+        attn_implementation="eager",
+        torch_dtype=torch.float16,  # Use half precision to save memory
+    )
+
+    # Move model to GPU
+    model = model.to(device)
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    return tokenizer, model
+    return tokenizer, model, device
 
 
-def extract_attention_from_text(tokenizer, model, text):
+def extract_attention_from_text(tokenizer, model, device, text):
     inputs = tokenizer(text, return_tensors="pt", max_length=1000, truncation=True)
+
+    # Move input tensors to the same device as the model
+    inputs = {k: v.to(device) for k, v in inputs.items()}
 
     with torch.no_grad():
         outputs = model(**inputs)

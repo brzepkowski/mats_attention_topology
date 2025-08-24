@@ -1,24 +1,27 @@
 from common import load_model_and_tokenizer, extract_attention_from_text
-from sklearn.manifold import smacof
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 import gudhi as gd
 import gudhi.representations
 import numpy as np
 import json
 import random
-from tqdm import tqdm
+import os
 
 CORRECT_PROMPTS_PATH = "prompts/correct_prompts.json"
 CONFLICTING_PROMPTS_PATH = "prompts/conflicting_prompts.json"
 RANDOM_SEED = 42
 MODEL_NAME = "Qwen/Qwen2.5-1.5B"
-TEST_SIZE = 3
+# MODEL_NAME = "Qwen/Qwen2.5-7B"
+TEST_SIZE = 100
+
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
-def barcodes_for_prompt(tokenizer, model, prompt, max_dim = 2):
+def barcodes_for_prompt(tokenizer, model, device, prompt, max_dim = 2):
     num_layers = model.config.num_hidden_layers  # Get the number of attention layers
 
-    attention = extract_attention_from_text(tokenizer, model, prompt)
+    attention = extract_attention_from_text(tokenizer, model, device, prompt)
 
     max_epsilon = 1.0  # We can now set max_epsilon to 1.0, as we are now operating in the "proper"
                        # space, where the max distance is equal to 1
@@ -92,14 +95,14 @@ def persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, ax
     return bp
 
 
-def persistence_entropy_multiple_homologies(tokenizer, model, correct_prompts, conflicting_prompts, max_homology_dim, axs):
+def persistence_entropy_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs):
     bps_correct = []
     bps_conflicting = []
 
     # 1. Correct prompts
     persistence_intervals_multiple_prompts = []
     for prompt in tqdm(correct_prompts):
-        persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, prompt, max_dim = max_homology_dim + 1))
+        persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, device, prompt, max_dim = max_homology_dim + 1))
     # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
 
     for homology_dim in range(max_homology_dim + 1):
@@ -112,7 +115,7 @@ def persistence_entropy_multiple_homologies(tokenizer, model, correct_prompts, c
     # 2. Conflicting prompts
     persistence_intervals_multiple_prompts = []
     for prompt in tqdm(conflicting_prompts):
-        persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, prompt, max_dim = max_homology_dim + 1))
+        persistence_intervals_multiple_prompts.append(barcodes_for_prompt(tokenizer, model, device, prompt, max_dim = max_homology_dim + 1))
     # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
 
     for homology_dim in range(max_homology_dim + 1):
@@ -144,32 +147,23 @@ if __name__ == "__main__":
     correct_prompts = np.array(correct_prompts)[prompts_indices]
     conflicting_prompts = np.array(conflicting_prompts)[prompts_indices]
 
-    tokenizer, model = load_model_and_tokenizer(MODEL_NAME)
+    tokenizer, model, device = load_model_and_tokenizer(MODEL_NAME)
 
     # ----- THE MAIN PART -----
-    max_homology_dim = 1
+    max_homology_dim = 2
 
     figs = []
     axs = []
     for homology_dim in range(max_homology_dim + 1):
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize = (16, 8))
         figs.append(fig)
         axs.append(ax)
 
-    persistence_entropy_multiple_homologies(tokenizer, model, correct_prompts, conflicting_prompts, max_homology_dim, axs)
+    persistence_entropy_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs)
+    for i, fig in enumerate(figs):
+        subtitle = MODEL_NAME.split("/")[1]
+        fig.suptitle(rf"{subtitle} | $H_{{{i}}}$")
+        fig.savefig(f"{subtitle}_H{i}_n{TEST_SIZE}.png")
+        fig.savefig(f"{subtitle}_H{i}_n{TEST_SIZE}.pdf")
 
-
-    # bp_0 = persistence_entropy(tokenizer, model, correct_prompts, ax)
-    # bp_1 = persistence_entropy(tokenizer, model, conflicting_prompts, ax)
-
-    # # Color the boxes differently
-    # for patch in bp_0['boxes']:
-    #     patch.set_facecolor('lightblue')
-    # for patch in bp_1['boxes']:
-    #     patch.set_facecolor('lightcoral')
-    #     patch.set_alpha(0.6)  # Make semi-transparent
-
-    # # Add legend
-    # ax.legend([bp_0["boxes"][0], bp_1["boxes"][0]], ['Correct prompts', 'Conflicting prompts'])
-
-    plt.show()
+    # plt.show()
