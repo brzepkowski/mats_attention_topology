@@ -12,7 +12,7 @@ CORRECT_PROMPTS_PATH = "prompts/correct_prompts.json"
 CONFLICTING_PROMPTS_PATH = "prompts/conflicting_prompts.json"
 RANDOM_SEED = 42
 MODEL_NAME = "Qwen/Qwen2.5-3B"
-TEST_SIZE = 500
+TEST_SIZE = 10
 PREFIX = True
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
