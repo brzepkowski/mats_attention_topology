@@ -12,13 +12,15 @@ CORRECT_PROMPTS_PATH = "prompts/correct_prompts.json"
 CONFLICTING_PROMPTS_PATH = "prompts/conflicting_prompts.json"
 RANDOM_SEED = 42
 MODEL_NAME = "Qwen/Qwen2.5-3B"
-TEST_SIZE = 100
+TEST_SIZE = 500
+PREFIX = True
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
 def barcodes_for_prompt(tokenizer, model, device, prompt, max_dim = 2):
-    prompt = 'Is this context correct? Yes/No\n"' + prompt + '"'  # TODO: Decide whether to keep!
+    if PREFIX:
+        prompt = 'Is this context correct? Yes/No\n"' + prompt + '"'
 
     num_layers = model.config.num_hidden_layers  # Get the number of attention layers
 
@@ -156,7 +158,7 @@ if __name__ == "__main__":
     tokenizer, model, device = load_model_and_tokenizer(MODEL_NAME)
 
     # ----- THE MAIN PART -----
-    max_homology_dim = 2
+    max_homology_dim = 1
 
     figs = []
     axs = []
@@ -168,8 +170,13 @@ if __name__ == "__main__":
     persistence_entropy_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs)
     for i, fig in enumerate(figs):
         subtitle = MODEL_NAME.split("/")[1]
-        fig.suptitle(rf"{subtitle} | $PE_{{{i}}}$")
-        fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}.png")
-        fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}.pdf")
+        if PREFIX:
+            fig.suptitle(rf"{subtitle} | $PE_{{{i}}}$ | prefix: True")
+            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pT.png")
+            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pT.pdf")
+        else:
+            fig.suptitle(rf"{subtitle} | $PE_{{{i}}}$ | prefix: False")
+            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pF.png")
+            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pF.pdf")
 
     # plt.show()
