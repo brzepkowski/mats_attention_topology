@@ -111,8 +111,10 @@ def entropy_summary(persistence_intervals_multiple_prompts, homology_dim, ax, la
 
         if label == "Correct prompts":
             ax[layer_idx // ncols, layer_idx % ncols].plot(xs, es_array, "-", color="lightblue", label=label)
+            ax[layer_idx // ncols, layer_idx % ncols].set_title(f"Layer: {layer_idx}")
         else:
             ax[layer_idx // ncols, layer_idx % ncols].plot(xs, es_array, "--", color="lightcoral", label=label)
+            ax[layer_idx // ncols, layer_idx % ncols].set_title(f"Layer: {layer_idx}")
 
 
 def entropy_summary_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs):
@@ -178,10 +180,12 @@ if __name__ == "__main__":
     for i, fig in enumerate(figs):
         subtitle = MODEL_NAME.split("/")[1]
         if PREFIX:
+            fig.subplots_adjust(bottom=0.03, left=0.03, right=0.97, hspace=0.5, wspace=0.5)
             fig.suptitle(rf"{subtitle} | $ES_{{{i}}}$ | prefix: True")
             fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pT.png")
             fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pT.pdf")
         else:
+            fig.subplots_adjust(bottom=0.03, left=0.03, right=0.97, hspace=0.5, wspace=0.5)
             fig.suptitle(rf"{subtitle} | $ES_{{{i}}}$ | prefix: False")
             fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pF.png")
             fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pF.pdf")
