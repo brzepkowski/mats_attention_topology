@@ -65,26 +65,21 @@ def barcodes_for_prompt(tokenizer, model, device, prompt, max_dim = 2):
     return persistence_intervals_multiple_layers
 
 
-def custom_entropy(arr):
+def max_max_death(arr):
     # we create a lambda function which removes the infinity (end = 1 in our case) bars from a barcode.
     remove_infinity = lambda barcode : np.array([bars for bars in barcode if bars[1]!= 1])
     # apply this operator to all barcodes.
     arr = list(map(remove_infinity, arr))
 
-    entropies = []
+    max_deaths = []
     for single_prompt_persistence_intervals in arr:
-        k = len(single_prompt_persistence_intervals)
-        p = [bar[1] - bar[0] for bar in single_prompt_persistence_intervals]
-        p = p / np.sum(p)
-        entropy = -np.dot(p, np.log(p))
-
-        # Normalize entropy
-        entropy /= np.log(k)
-        entropies.append(entropy)
-    return np.array(entropies)
+        lifespans = np.array([bar[1] for bar in single_prompt_persistence_intervals])
+        max_death = np.max(lifespans)
+        max_deaths.append(max_death)
+    return np.max(max_deaths)
 
 
-def persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, ax):
+def entropy_summary(persistence_intervals_multiple_prompts, homology_dim, ax, label):
     # H_{h_dim} homology
     # ~h_0_persistence_intervals = persistence_intervals_multiple_prompts[:, :, homology_dim, :]
     h_0_persistence_intervals = []
@@ -94,23 +89,33 @@ def persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, ax
             h_0_persistence_intervals[i].append(persistence_intervals_multiple_prompts[i][j][homology_dim])
     # `h_0_persistence_intervals` has shape PROMPTS_NUM X LAYERS_NUM X BARCODES_NUM
 
-    pe_per_layer = []
+    num_layers = model.config.num_hidden_layers
+    ncols = num_layers // 4
     for layer_idx in tqdm(range(model.config.num_hidden_layers)):
+    # subplot_idx = 0
+    # for layer_idx in [0, num_layers // 3, num_layers // 2, 2 * (num_layers // 3), num_layers - 1]:
         # ~persistence_intervals = h_0_persistence_intervals[:, layer_idx, :]
         _persistence_intervals = []
         for i in range(len(h_0_persistence_intervals)):
             _persistence_intervals.append(h_0_persistence_intervals[i][layer_idx])
 
-        pe_array = custom_entropy(_persistence_intervals)
-        pe_per_layer.append(pe_array)
+        # Get the max distance, for which anything interesting is happening
+        max_death = max_max_death(_persistence_intervals)
 
-    bp = ax.boxplot(pe_per_layer, tick_labels=range(model.config.num_hidden_layers), patch_artist=True)
-    return bp
+        resolution = 10000
+        ES = gd.representations.Entropy(mode='vector', sample_range=[0, max_death], resolution = resolution, normalized = True)
+        es_array = ES.fit_transform(_persistence_intervals)
+        es_array = es_array[0]
+
+        xs = np.linspace(0, max_death, len(es_array))
+
+        if label == "Correct prompts":
+            ax[layer_idx // ncols, layer_idx % ncols].plot(xs, es_array, "-", color="lightblue", label=label)
+        else:
+            ax[layer_idx // ncols, layer_idx % ncols].plot(xs, es_array, "--", color="lightcoral", label=label)
 
 
-def persistence_entropy_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs):
-    bps_correct = []
-    bps_conflicting = []
+def entropy_summary_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs):
 
     # 1. Correct prompts
     persistence_intervals_multiple_prompts = []
@@ -119,11 +124,7 @@ def persistence_entropy_multiple_homologies(tokenizer, model, device, correct_pr
     # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
 
     for homology_dim in range(max_homology_dim + 1):
-        bp_correct = persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, axs[homology_dim])
-        bps_correct.append(bp_correct)
-        # Color the boxes differently
-        for patch in bp_correct['boxes']:
-            patch.set_facecolor('lightblue')
+        entropy_summary(persistence_intervals_multiple_prompts, homology_dim, axs[homology_dim], label="Correct prompts")
 
     # 2. Conflicting prompts
     persistence_intervals_multiple_prompts = []
@@ -132,16 +133,11 @@ def persistence_entropy_multiple_homologies(tokenizer, model, device, correct_pr
     # `persistence_intervals_multiple_prompts` has shape PROMPTS_NUM X LAYERS_NUM X HOMOLOGIES_NUM X BARCODES_NUM
 
     for homology_dim in range(max_homology_dim + 1):
-        bp_conflicting = persistence_entropy(persistence_intervals_multiple_prompts, homology_dim, axs[homology_dim])
-        bps_conflicting.append(bp_conflicting)
-        # Color the boxes differently
-        for patch in bp_conflicting['boxes']:
-            patch.set_facecolor('lightcoral')
-            patch.set_alpha(0.6)  # Make semi-transparent
+        entropy_summary(persistence_intervals_multiple_prompts, homology_dim, axs[homology_dim], label="Conflicting prompts")
 
-    # 3. Add legends to figures
-    for i in range(len(axs)):
-        axs[i].legend([bps_correct[i]["boxes"][0], bps_conflicting[i]["boxes"][0]], ['Correct prompts', 'Conflicting prompts'])
+    # # 3. Add legends to figures
+    # for i in range(len(axs)):
+    #     axs[i].legend([bps_correct[i]["boxes"][0], bps_conflicting[i]["boxes"][0]], ['Correct prompts', 'Conflicting prompts'])
 
 
 if __name__ == "__main__":
@@ -167,21 +163,27 @@ if __name__ == "__main__":
 
     figs = []
     axs = []
+    num_layers = model.config.num_hidden_layers
     for homology_dim in range(max_homology_dim + 1):
-        fig, ax = plt.subplots(figsize = (16, 8))
+        fig, ax = plt.subplots(4, num_layers // 4, figsize = (16, 10))
+        # Force scientific notation on Y axes
+        for _ax in ax.flat:
+            _ax.ticklabel_format(style='scientific', axis='y', scilimits=(0,0))
+
         figs.append(fig)
         axs.append(ax)
 
-    persistence_entropy_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs)
+    entropy_summary_multiple_homologies(tokenizer, model, device, correct_prompts, conflicting_prompts, max_homology_dim, axs)
+    
     for i, fig in enumerate(figs):
         subtitle = MODEL_NAME.split("/")[1]
         if PREFIX:
-            fig.suptitle(rf"{subtitle} | $PE_{{{i}}}$ | prefix: True")
-            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pT.png")
-            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pT.pdf")
+            fig.suptitle(rf"{subtitle} | $ES_{{{i}}}$ | prefix: True")
+            fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pT.png")
+            fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pT.pdf")
         else:
-            fig.suptitle(rf"{subtitle} | $PE_{{{i}}}$ | prefix: False")
-            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pF.png")
-            fig.savefig(f"{subtitle}_PE{i}_n{TEST_SIZE}_pF.pdf")
+            fig.suptitle(rf"{subtitle} | $ES_{{{i}}}$ | prefix: False")
+            fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pF.png")
+            fig.savefig(f"{subtitle}_ES{i}_n{TEST_SIZE}_pF.pdf")
 
     # plt.show()
