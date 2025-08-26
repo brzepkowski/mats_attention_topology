@@ -116,26 +116,26 @@ def draw_simplicial_complex(ax, points, simplex_tree, layer_idx):
     for vertex in vertices:
         x = points[vertex, 0]
         y = points[vertex, 1]
-        ax.scatter(x, y, c='darkblue', s=100, zorder=5)
-        ax.annotate(vertex, (x + shift, y + shift))
+        ax.scatter(x, y, c='tab:blue', s=40, zorder=5)
+        # ax.annotate(vertex, (x + shift, y + shift))
 
-    # Draw lines
-    for edge in edges:
-        x_0, y_0 = points[edge[0]]
-        x_1, y_1 = points[edge[1]]
-        line = plt.Line2D([x_0, x_1], [y_0, y_1], color="blue", linewidth=1)
-        ax.add_line(line)
+    # # Draw lines
+    # for edge in edges:
+    #     x_0, y_0 = points[edge[0]]
+    #     x_1, y_1 = points[edge[1]]
+    #     line = plt.Line2D([x_0, x_1], [y_0, y_1], color="blue", linewidth=1)
+    #     ax.add_line(line)
 
-    # Draw triangles
-    for triangle in triangles:
-        triangle_polygon = plt.Polygon(
-            points[triangle],  # xy: (N, 2) array
-            alpha=0.3,
-            facecolor='lightblue',
-            edgecolor='blue',
-            linewidth=1
-        )
-        ax.add_patch(triangle_polygon)
+    # # Draw triangles
+    # for triangle in triangles:
+    #     triangle_polygon = plt.Polygon(
+    #         points[triangle],  # xy: (N, 2) array
+    #         alpha=0.3,
+    #         facecolor='lightblue',
+    #         edgecolor='blue',
+    #         linewidth=1
+    #     )
+    #     ax.add_patch(triangle_polygon)
 
     ax.set_title(f"LAYER: {layer_idx}", fontsize=12)
     # ax.set_xlim(-1.5, 1.5)
