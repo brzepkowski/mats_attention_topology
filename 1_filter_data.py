@@ -3,7 +3,7 @@ import json
 import torch
 import random
 import numpy as np
-MODEL_NAME = "Qwen/Qwen2.5-3B"
+MODEL_NAME = "Qwen/Qwen3-4B"
 
 
 if __name__ == "__main__":

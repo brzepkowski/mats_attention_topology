@@ -8,12 +8,12 @@ import json
 import random
 import os
 
-CORRECT_PROMPTS_PATH = "prompts/correct_prompts.json"
-CONFLICTING_PROMPTS_PATH = "prompts/conflicting_prompts.json"
+CORRECT_PROMPTS_PATH = "prompts/Qwen3-4B/correct_prompts.json"
+CONFLICTING_PROMPTS_PATH = "prompts/Qwen3-4B/conflicting_prompts.json"
+MODEL_NAME = "Qwen/Qwen3-4B"
 RANDOM_SEED = 42
-MODEL_NAME = "Qwen/Qwen2.5-3B"
 TEST_SIZE = 500
-PREFIX = True
+PREFIX = False
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 

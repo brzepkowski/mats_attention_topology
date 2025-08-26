@@ -3,7 +3,7 @@ import json
 import torch
 import random
 import numpy as np
-MODEL_NAME = "Qwen/Qwen2.5-3B"
+MODEL_NAME = "Qwen/Qwen3-4B"
 
 
 if __name__ == "__main__":
@@ -11,8 +11,7 @@ if __name__ == "__main__":
     random.seed(42)
     np.random.seed(42)
 
-    # prompts_path = "prompts/correct_prompts.json"
-    prompts_path = "prompts/conflicting_prompts.json"
+    prompts_path = "prompts/Qwen3-4B/correct_prompts.json"
 
     tokenizer, model, device = load_model_and_tokenizer(MODEL_NAME)
 
