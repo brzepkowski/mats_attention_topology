@@ -74,25 +74,31 @@ def main():
     tokenizer, model, device = load_model_and_tokenizer(MODEL_NAME)
     num_layers = model.config.num_hidden_layers  # Get the number of attention layers
 
-    attention = extract_attention_from_text(tokenizer, model, device, "This is just some test prompt!")
+    attention = extract_attention_from_text(tokenizer, model, device, "Hello world!")
 
-    fig_dist = plt.figure(figsize=(16, 8))
+    fig_dist = plt.figure(figsize=(8, 4))
 
     max_dim = 2
     max_epsilon = 0.7
 
     points = None
 
-    for layer_idx in range(num_layers):
+    # for layer_idx in range(num_layers):
+    subplot_idx = 1
+    for layer_idx in [0, 12, 24, 35]:
 
         # 3. Get dist matrix as an average over all heads in a given layer
         num_heads = attention[layer_idx].shape[0]
 
         dist = None
         for head_idx in range(num_heads):
+            
             A = attention[layer_idx, head_idx].numpy()
             if dist is None:
                 dist = np.maximum(A, A.T)
+                if layer_idx == 0 and head_idx == 0:
+                    print("A: \n", A)
+                    print("dist: \n", dist)
             else:
                 dist += np.maximum(A, A.T)
         dist /= num_heads
@@ -107,11 +113,8 @@ def main():
         # print("stress: ", stress)
 
         # 5. Plot the simplical complexes for different values of epsilon
-        ax = fig_dist.add_subplot(4, int(num_layers / 4), layer_idx + 1)  # add_subplot(nrows, ncols, index, **kwargs)
-
-        # plt.show()
-        # import sys
-        # sys.exit()
+        # ax = fig_dist.add_subplot(4, int(num_layers / 4), layer_idx + 1)  # add_subplot(nrows, ncols, index, **kwargs)
+        ax = fig_dist.add_subplot(1, 4, subplot_idx)  # add_subplot(nrows, ncols, index, **kwargs)
 
         # Create Vietoris–Rips complex - a simplex is included iff all its vertices are pairwise within distance epsilon
         rips_complex = gd.RipsComplex(points=points, max_edge_length=max_epsilon)
@@ -123,6 +126,7 @@ def main():
         else:
             plot_clusters_in_insets(points, ax)
             ax.set_title(f"LAYER: {layer_idx}", fontsize=12)
+        subplot_idx += 1
 
     fig_dist.suptitle(r"$dist = max(A, A.T)$")
     plt.tight_layout()
